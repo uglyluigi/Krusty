@@ -11,7 +11,7 @@
       </ENTRIES>
     </extension>
     <option name="JAR_PATH" value="$PROJECT_DIR$/target/mainModule-1.0-SNAPSHOT-jar-with-dependencies.jar" />
-    <option name="VM_PARAMETERS" value="-Djava.library.path=C:\Users\bzane\KotlinRustInteropTest\Rust\target\debug" />
+    <option name="VM_PARAMETERS" value="-Djava.library.path=C:\Users\bzane\Krusty\Rust\target\debug" />
     <option name="WORKING_DIRECTORY" value="C:\Users\bzane\Krusty\Kotlin" />
     <option name="ALTERNATIVE_JRE_PATH" />
     <method v="2" />
