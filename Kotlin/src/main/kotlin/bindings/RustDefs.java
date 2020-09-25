@@ -4,6 +4,6 @@ public class RustDefs {
     public static native void exampleMethod();
 
     static {
-       System.loadLibrary("Rust");
+       System.loadLibrary("krustynative");
     }
 }
