@@ -1,5 +1,5 @@
 [package]
-name = "krustynative"
+name = "Rust"
 version = "0.1.0"
 authors = ["uglyluigi <5006946+uglyluigi@users.noreply.github.com>"]
 edition = "2018"
