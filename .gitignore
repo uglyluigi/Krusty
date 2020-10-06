@@ -1,4 +1,7 @@
 *.env
+*.jpg
+*.png
+picture_input/*
 # Created by https://www.toptal.com/developers/gitignore/api/kotlin,java,rust
 # Edit at https://www.toptal.com/developers/gitignore?templates=kotlin,java,rust
 
