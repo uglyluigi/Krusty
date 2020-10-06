@@ -12,3 +12,6 @@ crate-type = ["cdylib"]
 [dependencies]
 j4rs = "0.12.0"
 j4rs_derive = "0.1.0"
+rgb = "0.8.25"
+imgref = "1.7.0"
+raster = "0.2.0"

@@ -1,7 +1,11 @@
-use j4rs::prelude::*;
-use j4rs_derive::*;
+mod krustynative;
 
-#[call_from_java("bindings.RustDefs.exampleMethod")]
-fn example_method() {
-    println!("wut up");
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_blur() {
+        crate::krustynative::blur_image_impl("./picture_input/trump.jpg", 100);
+        use std::fs;
+        assert_eq!(fs::metadata("./output.png").is_ok(), true)
+    }
 }
