@@ -36,13 +36,13 @@ pub fn blur_image_impl(path: &str, passes: i32) {
         
             match raster::save(&image, new_path.clone()) {
                 Ok(()) => println!("saved {}", new_path),
-                Err(s) => eprintln!("couldn\'t save {}:\n{:?}", new_path, s),
+                Err(s) => { 
+                    eprintln!("couldn\'t save {}:\n{:?}", new_path, s);
+                    
+                }
             }
         },
 
         Err(err) => eprintln!("Raster-rs couldn\'t open file:\n{:?}", err),
-
     }
-
-    
 }
