@@ -7,6 +7,8 @@ public class RustDefs {
 
     public static native void blurImage(Instance<String> path);
 
+    public static native void blendImages(Instance<String> path1, Instance<String> path2);
+
     static {
        System.loadLibrary("krustynative");
     }
