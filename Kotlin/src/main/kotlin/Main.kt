@@ -40,6 +40,7 @@ open class Main {
                     }
                 }
 
+
                 if ("!ping" == content) {
                     val channel = message.channel.block()
                     channel?.createMessage("Pong!")?.block()
@@ -58,6 +59,10 @@ open class Main {
                         e.printStackTrace()
                     }
                 }
+
+                val handler: CommandHandler = CommandHandler()
+
+
 
             }
 
