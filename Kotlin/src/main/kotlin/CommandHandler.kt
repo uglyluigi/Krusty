@@ -1,16 +1,19 @@
 package bot
 
+import discord4j.core.`object`.entity.channel.Channel
+import discord4j.core.`object`.entity.channel.MessageChannel
+
 public class CommandHandler {
     enum class ArgType {
         NUMBER,
         STRING
     }
 
-    class Command(val commandName: String, private val numArgs: Int, argTypes: Array<ArgType>, private val callback: (args: List<String>) -> Unit) {
+    class Command(val commandName: String, private val numArgs: Int, argTypes: Array<ArgType>, private val callback: (args: List<String>, channel: MessageChannel) -> Unit) {
 
-        public fun execute(args: List<String>): Boolean {
+        public fun execute(args: List<String>, channel: MessageChannel): Boolean {
             if (args.size == this.numArgs) {
-                this.callback(args)
+                this.callback(args, channel)
             }
 
             return false
@@ -29,10 +32,8 @@ public class CommandHandler {
         return false
     }
 
-    public fun addCommand(commandName: String, numArgs: Int, argTypes: Array<ArgType>) {
-        commands.add(Command(commandName, numArgs, argTypes, {
-
-        }))
+    public fun addCommand(commandName: String, numArgs: Int, argTypes: Array<ArgType>, callback: (args: List<String>, channel: MessageChannel) -> Unit) {
+        commands.add(Command(commandName, numArgs, argTypes, callback))
     }
 
     fun searchForCommand(commandName: String): Command? {

@@ -61,9 +61,9 @@ open class Main {
                 }
 
                 val handler: CommandHandler = CommandHandler()
-
-
-
+                handler.addCommand("ping", 0, emptyArray()) { args, channel ->
+                    channel.createMessage("Pong!")?.block()
+                }
             }
 
 

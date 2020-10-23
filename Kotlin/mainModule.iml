@@ -45,7 +45,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Maven: com.discord4j:discord4j-core:3.1.1" level="project" />
     <orderEntry type="library" name="Maven: com.discord4j:discord-json:1.5.4" level="project" />
