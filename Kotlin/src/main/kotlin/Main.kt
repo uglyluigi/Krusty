@@ -23,6 +23,13 @@ open class Main {
             var waitingForImageAction = false
             var waitingForBlendType = false
 
+            val handler: CommandHandler = CommandHandler()
+
+            handler.addCommand("ping", 0, emptyArray()) { args, msg ->
+                print("Running !ping")
+                msg.channel.block()?.createMessage("Pong!")?.block()
+            }
+
             gateway?.on(MessageCreateEvent::class.java)?.subscribe {
                     event: MessageCreateEvent ->
                 val message = event.message
@@ -41,10 +48,7 @@ open class Main {
                 }
 
 
-                if ("!ping" == content) {
-                    val channel = message.channel.block()
-                    channel?.createMessage("Pong!")?.block()
-                } else if (message.attachments.isNotEmpty()) {
+                if (message.attachments.isNotEmpty()) {
                     println("Image attachment detected")
                     val imageAttachment = message.attachments.first().url
 
@@ -60,11 +64,12 @@ open class Main {
                     }
                 }
 
-                val handler: CommandHandler = CommandHandler()
-                handler.addCommand("ping", 0, emptyArray()) { args, channel ->
-                    channel.createMessage("Pong!")?.block()
+                if (handler.runCommand(content, message)) {
+                    println("COOL!")
                 }
             }
+
+
 
 
             gateway?.onDisconnect()?.block()
