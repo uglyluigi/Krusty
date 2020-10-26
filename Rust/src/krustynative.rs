@@ -76,3 +76,9 @@ pub fn blend_image_impl(path1: &str, path2: &str) {
     }
 
 }
+
+#[call_from_java("bindings.RustDefs.acceptFile")]
+pub fn accept_file(file: Instance) {
+    let jvm = Jvm::attach_thread().unwrap();
+    let f = jvm.to_rust::<std::fs::File>(file).unwrap();
+}

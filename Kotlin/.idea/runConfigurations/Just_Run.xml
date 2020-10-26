@@ -14,7 +14,7 @@
     <option name="VM_PARAMETERS" value="-Djava.library.path=C:\Users\bzane\Krusty\Rust\target\debug" />
     <option name="WORKING_DIRECTORY" value="C:\Users\bzane\Krusty\Kotlin" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-    <option name="ALTERNATIVE_JRE_PATH" value="openjdk-15" />
+    <option name="ALTERNATIVE_JRE_PATH" value="OpenJDK 13" />
     <method v="2" />
   </configuration>
 </component>

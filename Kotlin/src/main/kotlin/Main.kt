@@ -1,6 +1,8 @@
 package bot
 
 import bindings.RustDefs
+import bot.Hasher.Companion.md5
+import bot.Hasher.Companion.sha256
 import discord4j.core.DiscordClient
 import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.message.MessageCreateEvent
@@ -16,6 +18,10 @@ open class Main {
         @JvmStatic
         fun main(args: Array<String>) {
 
+            val f = File("poop.txt")
+            val instance = Java2RustUtils.createInstance(f)
+
+
             val dotenv = dotenv()
             val client = DiscordClient.create(dotenv["BOT_TOKEN"])
             val gateway = client.login().block()
@@ -30,49 +36,52 @@ open class Main {
                 msg.channel.block()?.createMessage("Pong!")?.block()
             }
 
+            handler.addCommand("rotate", 1, arrayOf(CommandHandler.ArgType.NUMBER), {
+                args, message ->
+
+            })
+
+            handler.addCommand("blur", 0, emptyArray()) { _, message ->
+                if (message.attachments.isNotEmpty()) {
+                    println("Downloading images")
+                    val files = downloadImagesFrom(message)
+
+                    for (f in files) {
+                        println(f.absolutePath)
+                    }
+                }
+            }
+
             gateway?.on(MessageCreateEvent::class.java)?.subscribe {
                     event: MessageCreateEvent ->
                 val message = event.message
                 val content = message.content
 
-                if (waitingForImageAction) {
-                    if (message.content == "blur") {
-                        RustDefs.blurImage(Java2RustUtils.createInstance("image.png"))
-                        println("Blurred your image.")
-                        message.channel.block()?.createMessage("Blurred your image")
-                        waitingForImageAction = false
-                        return@subscribe
-                    } else {
-                        message.channel.block()?.createMessage("??")
-                    }
-                }
-
-
-                if (message.attachments.isNotEmpty()) {
-                    println("Image attachment detected")
-                    val imageAttachment = message.attachments.first().url
-
-                    try {
-                        val url = URL(imageAttachment)
-                        val image = ImageIO.read(url)
-                        val outputFile = File("image.png")
-                        ImageIO.write(image, "png", outputFile)
-                        waitingForImageAction = true
-                        message.channel.block()?.createMessage("What do you want me to do?")?.block()
-                    } catch (e: IOException) {
-                        e.printStackTrace()
-                    }
-                }
-
-                if (handler.runCommand(content, message)) {
-                    println("COOL!")
+                if (content.isNotEmpty() && handler.runCommand(content, message)) {
+                    println("Ran command: $content")
                 }
             }
 
-
-
-
             gateway?.onDisconnect()?.block()
         }
+
+        fun downloadImagesFrom(msg: Message): ArrayList<File> {
+            val urls  = msg.attachments.map { URL(it.url) }
+            val files = arrayListOf<File>()
+            files.ensureCapacity(urls.size)
+            val hash = urls.joinToString { it.path }.sha256()
+
+            for ((index, url) in urls.withIndex()) {
+                ImageIO.read(url)?.let {
+                    val file = File("image_${hash}_$index.png")
+                    ImageIO.write(it, "png", file)
+                    files.add(file)
+                }
+            }
+
+            return files
+        }
+
+
     }
 }

@@ -8,7 +8,7 @@
           <option name="environmentProperties">
             <map />
           </option>
-          <option name="jreName" value="openjdk-15" />
+          <option name="jreName" value="#JAVA_HOME" />
           <option name="mavenProperties">
             <map />
           </option>
