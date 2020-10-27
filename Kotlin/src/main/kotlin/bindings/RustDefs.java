@@ -7,11 +7,11 @@ import java.io.File;
 public class RustDefs {
     public static native void exampleMethod(Instance<String> instance);
 
-    public static native void blurImage(Instance<String> path);
+    public static native Instance<String> blurImage(Instance<String> path, Instance<Integer> passes);
 
     public static native void blendImages(Instance<String> path1, Instance<String> path2);
 
-    public static native void acceptFile(Instance<File> fileInstance);
+    public static native void print(Instance<String> str);
 
     static {
        System.loadLibrary("krustynative");

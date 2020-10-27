@@ -17,11 +17,6 @@ open class Main {
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-
-            val f = File("poop.txt")
-            val instance = Java2RustUtils.createInstance(f)
-
-
             val dotenv = dotenv()
             val client = DiscordClient.create(dotenv["BOT_TOKEN"])
             val gateway = client.login().block()
@@ -36,18 +31,21 @@ open class Main {
                 msg.channel.block()?.createMessage("Pong!")?.block()
             }
 
-            handler.addCommand("rotate", 1, arrayOf(CommandHandler.ArgType.NUMBER), {
-                args, message ->
+            handler.addCommand("rotate", 1, arrayOf(CommandHandler.ArgType.NUMBER)) { args, message ->
 
-            })
+            }
 
-            handler.addCommand("blur", 0, emptyArray()) { _, message ->
+            handler.addCommand("blur", 0, arrayOf(CommandHandler.ArgType.NUMBER)) { args, message ->
                 if (message.attachments.isNotEmpty()) {
                     println("Downloading images")
                     val files = downloadImagesFrom(message)
 
                     for (f in files) {
-                        println(f.absolutePath)
+                        val filePath = Java2RustUtils.getObjectCasted<String>(RustDefs.blurImage(Java2RustUtils.createInstance(f.absolutePath), Java2RustUtils.createInstance(20)))
+                        val file = File(filePath)
+                        message.channel.block()?.createMessage { spec ->
+                            spec.addFile("output.png", file.inputStream())
+                        }?.block()
                     }
                 }
             }
