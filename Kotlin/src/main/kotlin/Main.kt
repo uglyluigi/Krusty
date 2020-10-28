@@ -1,7 +1,7 @@
 package bot
 
 import bindings.RustDefs
-import bot.Hasher.Companion.md5
+import bot.CommandHandler.Command.Companion.ArgRange
 import bot.Hasher.Companion.sha256
 import discord4j.core.DiscordClient
 import discord4j.core.`object`.entity.Message
@@ -9,7 +9,6 @@ import discord4j.core.event.domain.message.MessageCreateEvent
 import io.github.cdimascio.dotenv.dotenv
 import org.astonbitecode.j4rs.api.java2rust.Java2RustUtils
 import java.io.File
-import java.io.IOException
 import java.net.URL
 import javax.imageio.ImageIO
 
@@ -20,38 +19,49 @@ open class Main {
             val dotenv = dotenv()
             val client = DiscordClient.create(dotenv["BOT_TOKEN"])
             val gateway = client.login().block()
+            val handler = CommandHandler()
 
-            var waitingForImageAction = false
-            var waitingForBlendType = false
-
-            val handler: CommandHandler = CommandHandler()
-
-            handler.addCommand("ping", 0, emptyArray()) { args, msg ->
+            handler.addCommand(
+                commandName = "ping",
+                argRange = ArgRange.DONT_CARE_DIDNT_ASK,
+                numArgs = 0,
+                argNames = emptyArray(),
+                argTypes = emptyArray()
+            ) { args, msg ->
                 print("Running !ping")
                 msg.channel.block()?.createMessage("Pong!")?.block()
             }
 
-            handler.addCommand("rotate", 1, arrayOf(CommandHandler.ArgType.NUMBER)) { args, message ->
+            handler.addCommand(
+                commandName = "blur",
+                argRange = ArgRange.EXACTLY,
+                numArgs = 1,
+                argNames = arrayOf("passes"),
+                argTypes = arrayOf(CommandHandler.ArgType.NUMBER)
+            ) { args, message ->
+                val passes = args[0] as Int
 
-            }
-
-            handler.addCommand("blur", 0, arrayOf(CommandHandler.ArgType.NUMBER)) { args, message ->
                 if (message.attachments.isNotEmpty()) {
                     println("Downloading images")
                     val files = downloadImagesFrom(message)
 
                     for (f in files) {
-                        val filePath = Java2RustUtils.getObjectCasted<String>(RustDefs.blurImage(Java2RustUtils.createInstance(f.absolutePath), Java2RustUtils.createInstance(20)))
-                        val file = File(filePath)
-                        message.channel.block()?.createMessage { spec ->
-                            spec.addFile("output.png", file.inputStream())
-                        }?.block()
+                        Java2RustUtils.getObjectCasted<String>(
+                            RustDefs.blurImage(
+                                Java2RustUtils.createInstance(f.absolutePath),
+                                Java2RustUtils.createInstance(passes)
+                            )
+                        )?.let {
+                            val file = File(it)
+                            message.channel.block()?.createMessage { spec ->
+                                spec.addFile("output.png", file.inputStream())
+                            }?.block()
+                        }
                     }
                 }
             }
 
-            gateway?.on(MessageCreateEvent::class.java)?.subscribe {
-                    event: MessageCreateEvent ->
+            gateway?.on(MessageCreateEvent::class.java)?.subscribe { event: MessageCreateEvent ->
                 val message = event.message
                 val content = message.content
 
@@ -64,7 +74,7 @@ open class Main {
         }
 
         fun downloadImagesFrom(msg: Message): ArrayList<File> {
-            val urls  = msg.attachments.map { URL(it.url) }
+            val urls = msg.attachments.map { URL(it.url) }
             val files = arrayListOf<File>()
             files.ensureCapacity(urls.size)
             val hash = urls.joinToString { it.path }.sha256()
@@ -79,7 +89,5 @@ open class Main {
 
             return files
         }
-
-
     }
 }
