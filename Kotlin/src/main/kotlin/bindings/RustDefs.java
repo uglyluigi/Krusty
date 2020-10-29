@@ -13,5 +13,7 @@ public class RustDefs {
 
     public static native void blendImages(Instance<String> path1, Instance<String> path2);
 
+    public static native Instance<String> rotateImage(Instance<String> path, Instance<Integer> degree, Instance<Integer> r, Instance<Integer> g, Instance<Integer> b);
+
     public static native void print(Instance<String> str);
 }

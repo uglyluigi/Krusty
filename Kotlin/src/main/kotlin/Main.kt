@@ -1,15 +1,18 @@
 package bot
 
 import bindings.RustDefs
+import bot.CommandHandler.ArgType.*
 import bot.CommandHandler.Command.Companion.ArgRange
 import bot.Hasher.Companion.sha256
 import discord4j.core.DiscordClient
+import discord4j.core.`object`.entity.Attachment
 import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.message.MessageCreateEvent
 import io.github.cdimascio.dotenv.dotenv
 import org.astonbitecode.j4rs.api.java2rust.Java2RustUtils
 import java.io.File
 import java.net.URL
+import java.util.logging.Handler
 import javax.imageio.ImageIO
 
 open class Main {
@@ -37,7 +40,7 @@ open class Main {
                 argRange = ArgRange.EXACTLY,
                 numArgs = 1,
                 argNames = arrayOf("passes"),
-                argTypes = arrayOf(CommandHandler.ArgType.NUMBER)
+                argTypes = arrayOf(NUMBER)
             ) { args, message ->
                 val passes = args[0] as Int
 
@@ -52,10 +55,39 @@ open class Main {
                                 Java2RustUtils.createInstance(passes)
                             )
                         )?.let {
-                            val file = File(it)
-                            message.channel.block()?.createMessage { spec ->
-                                spec.addFile("output.png", file.inputStream())
-                            }?.block()
+                            Helper.emitImageResult(message, it)
+                        }
+                    }
+                }
+            }
+
+            handler.addCommand(
+                commandName = "rotate",
+                argRange = ArgRange.EXACTLY,
+                numArgs = 4,
+                argNames = arrayOf("degree", "r", "g", "b"),
+                argTypes = arrayOf(NUMBER, NUMBER, NUMBER, NUMBER),
+            ) { args, message ->
+                val degree = args[0] as Int
+                val red = args[1] as Int
+                val green = args[2] as Int
+                val blue = args[3] as Int
+
+                if (message.attachments.isNotEmpty()) {
+                    println("Downloading images")
+                    val files = downloadImagesFrom(message)
+
+                    for (f in files) {
+                        Java2RustUtils.getObjectCasted<String>(
+                            RustDefs.rotateImage(
+                                Java2RustUtils.createInstance(f.absolutePath),
+                                Java2RustUtils.createInstance(degree),
+                                Java2RustUtils.createInstance(red),
+                                Java2RustUtils.createInstance(green),
+                                Java2RustUtils.createInstance(blue)
+                            )
+                        )?.let {
+                            Helper.emitImageResult(message, it)
                         }
                     }
                 }

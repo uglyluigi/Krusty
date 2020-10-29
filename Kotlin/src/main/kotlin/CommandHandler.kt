@@ -36,7 +36,6 @@ class CommandHandler {
                 AT_MOST,
                 DONT_CARE_DIDNT_ASK
             }
-
         }
 
         fun execute(args: List<String>, message: Message): ExecutionResult {
@@ -72,7 +71,7 @@ class CommandHandler {
                 }
 
                 this.callback(argList, message)
-                SUCCESS
+                return SUCCESS
             } else {
                 return when (this.argRange) {
                     ArgRange.EXACTLY -> when {
@@ -85,8 +84,6 @@ class CommandHandler {
                     ArgRange.DONT_CARE_DIDNT_ASK -> WTF
                 }
             }
-
-            return WTF
         }
 
 
@@ -123,10 +120,12 @@ class CommandHandler {
                     Helper.reply(msg, "You supplied too many arguments.")
                     false
                 }
+
                 TOO_FEW_ARGS -> {
                     Helper.reply(msg, "You didn\'t supply enough arguments.")
                     false
                 }
+
                 WRONG_ARG_TYPE -> {
                     Helper.reply(msg, "You didn\'t supply the right type of arguments.")
                     false
