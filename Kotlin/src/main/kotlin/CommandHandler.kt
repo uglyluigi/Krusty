@@ -58,11 +58,11 @@ class CommandHandler {
                     argList.add(
                         when (argType) {
                             ArgType.NUMBER -> {
-                                try {
-                                    token.toInt()
-                                } catch (e: NumberFormatException) {
-                                    return WRONG_ARG_TYPE
+                                token.toIntOrNull()?.let {
+                                    return@let it
                                 }
+
+                                return WRONG_ARG_TYPE
                             }
 
                             ArgType.STRING -> token
