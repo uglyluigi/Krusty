@@ -24,6 +24,10 @@
             <id>mavenCentral</id>
             <url>https://repo1.maven.org/maven2/</url>
         </repository>
+        <repository>
+            <id>Clojars</id>
+            <url>https://clojars.org/repo/</url>
+        </repository>
     </repositories>
 
     <build>
@@ -102,6 +106,11 @@
         </plugins>
     </build>
     <dependencies>
+        <dependency>
+            <groupId>opencv</groupId>
+            <artifactId>opencv</artifactId>
+            <version>4.0.0-0</version>
+        </dependency>
         <dependency>
             <groupId>com.discord4j</groupId>
             <artifactId>discord4j-core</artifactId>
