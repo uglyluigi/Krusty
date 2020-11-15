@@ -10,6 +10,14 @@ import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.message.MessageCreateEvent
 import io.github.cdimascio.dotenv.dotenv
 import org.astonbitecode.j4rs.api.java2rust.Java2RustUtils
+import org.opencv.core.Core
+import org.opencv.core.MatOfRect
+import org.opencv.core.Point
+import org.opencv.core.Scalar
+import org.opencv.highgui.HighGui
+import org.opencv.imgcodecs.Imgcodecs
+import org.opencv.imgproc.Imgproc
+import org.opencv.objdetect.CascadeClassifier
 import java.io.File
 import java.net.URL
 import java.util.logging.Handler
@@ -33,6 +41,30 @@ open class Main {
             ) { args, msg ->
                 print("Running !ping")
                 msg.channel.block()?.createMessage("Pong!")?.block()
+            }
+
+            handler.addCommand(
+                commandName = "findFace",
+                argRange = ArgRange.DONT_CARE_DIDNT_ASK,
+                numArgs = 0,
+                argNames = emptyArray(),
+                argTypes = emptyArray()
+            ) { args, message ->
+                val classifier = CascadeClassifier(javaClass.getResource("/lbpcascade_frontalface.xml").path)
+                val image = Imgcodecs.imread(javaClass.getResource("/lena.png").path)
+                val detections = MatOfRect()
+
+                classifier.detectMultiScale(image, detections)
+
+                println("Detected ${detections.toArray().size} faces")
+
+                for (rect in detections.toArray()) {
+                    Imgproc.rectangle(image, Point(rect.x.toDouble(), rect.y.toDouble()), Point(rect.x + rect.width.toDouble(), rect.y + rect.height.toDouble()),  Scalar(0.0, 255.0, 0.0))
+                }
+
+                val fileName = "detection.png"
+                println("Writing $fileName")
+                Imgcodecs.imwrite(fileName, image)
             }
 
             handler.addCommand(
