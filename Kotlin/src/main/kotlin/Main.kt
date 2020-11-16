@@ -1,32 +1,28 @@
 package bot
 
 import bindings.RustDefs
-import bot.CommandHandler.ArgType.*
+import bot.CommandHandler.ArgType.NUMBER
 import bot.CommandHandler.Command.Companion.ArgRange
 import bot.Hasher.Companion.sha256
 import discord4j.core.DiscordClient
-import discord4j.core.`object`.entity.Attachment
 import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.message.MessageCreateEvent
 import io.github.cdimascio.dotenv.dotenv
 import org.astonbitecode.j4rs.api.java2rust.Java2RustUtils
-import org.opencv.core.Core
-import org.opencv.core.MatOfRect
-import org.opencv.core.Point
-import org.opencv.core.Scalar
-import org.opencv.highgui.HighGui
+import org.opencv.core.*
 import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.imgproc.Imgproc
 import org.opencv.objdetect.CascadeClassifier
+import org.opencv.objdetect.Objdetect
 import java.io.File
 import java.net.URL
-import java.util.logging.Handler
 import javax.imageio.ImageIO
 
 open class Main {
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
+            System.loadLibrary(Core.NATIVE_LIBRARY_NAME)
             val dotenv = dotenv()
             val client = DiscordClient.create(dotenv["BOT_TOKEN"])
             val gateway = client.login().block()
@@ -41,30 +37,6 @@ open class Main {
             ) { args, msg ->
                 print("Running !ping")
                 msg.channel.block()?.createMessage("Pong!")?.block()
-            }
-
-            handler.addCommand(
-                commandName = "findFace",
-                argRange = ArgRange.DONT_CARE_DIDNT_ASK,
-                numArgs = 0,
-                argNames = emptyArray(),
-                argTypes = emptyArray()
-            ) { args, message ->
-                val classifier = CascadeClassifier(javaClass.getResource("/lbpcascade_frontalface.xml").path)
-                val image = Imgcodecs.imread(javaClass.getResource("/lena.png").path)
-                val detections = MatOfRect()
-
-                classifier.detectMultiScale(image, detections)
-
-                println("Detected ${detections.toArray().size} faces")
-
-                for (rect in detections.toArray()) {
-                    Imgproc.rectangle(image, Point(rect.x.toDouble(), rect.y.toDouble()), Point(rect.x + rect.width.toDouble(), rect.y + rect.height.toDouble()),  Scalar(0.0, 255.0, 0.0))
-                }
-
-                val fileName = "detection.png"
-                println("Writing $fileName")
-                Imgcodecs.imwrite(fileName, image)
             }
 
             handler.addCommand(
@@ -125,6 +97,48 @@ open class Main {
                 }
             }
 
+            handler.addCommand(
+                commandName = "findFace",
+                argRange = ArgRange.EXACTLY,
+                numArgs = 0,
+                argNames = emptyArray(),
+                argTypes = emptyArray()
+            ) { args, message ->
+                if (message.attachments.isNotEmpty()) {
+                    val images = downloadImagesFrom(message)
+
+                    if (images.isNotEmpty()) {
+                        for (img in images) {
+                            val classifier = CascadeClassifier()
+                            val imageMat = loadImage(img.absolutePath)
+                            val minFaceSize = Math.round(imageMat.rows() * 0.1f).toDouble()
+                            val detections = MatOfRect()
+
+                            classifier.load(File(Main::class.java.getResource("./lbpcascade_frontalface.xml").toURI()).absolutePath)
+
+                            if (!classifier.empty()) {
+                                if (!imageMat.empty()) {
+                                    classifier.detectMultiScale(imageMat, detections, 1.1, 3, Objdetect.CASCADE_SCALE_IMAGE, Size(minFaceSize, minFaceSize), Size())
+                                    val faces = detections.toArray()
+
+                                    for (face in faces) {
+                                        Imgproc.rectangle(imageMat, face.tl(), face.br(), Scalar(0.0, 0.0, 255.0), 3)
+                                    }
+
+                                    saveImage(imageMat, "out.jpg")
+                                } else {
+                                    println("Couldn\'t open input file")
+                                }
+                            } else {
+                                println("Couldn\'t load XML configuration file. Face recognition will not take place")
+                            }
+                        }
+                    }
+                } else {
+                    Helper.reply(message, "This command requires an image attachment with your message.")
+                }
+            };
+
             gateway?.on(MessageCreateEvent::class.java)?.subscribe { event: MessageCreateEvent ->
                 val message = event.message
                 val content = message.content
@@ -152,6 +166,14 @@ open class Main {
             }
 
             return files
+        }
+
+        fun loadImage(imagePath: String): Mat {
+            return Imgcodecs.imread(imagePath)
+        }
+
+        fun saveImage(matrix: Mat, path: String) {
+            Imgcodecs.imwrite(path, matrix)
         }
     }
 }
