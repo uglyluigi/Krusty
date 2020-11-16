@@ -17,6 +17,7 @@ import org.opencv.objdetect.Objdetect
 import java.io.File
 import java.net.URL
 import javax.imageio.ImageIO
+import kotlin.random.Random
 
 open class Main {
     companion object {
@@ -121,11 +122,16 @@ open class Main {
                                     classifier.detectMultiScale(imageMat, detections, 1.1, 3, Objdetect.CASCADE_SCALE_IMAGE, Size(minFaceSize, minFaceSize), Size())
                                     val faces = detections.toArray()
 
-                                    for (face in faces) {
-                                        Imgproc.rectangle(imageMat, face.tl(), face.br(), Scalar(0.0, 0.0, 255.0), 3)
+                                    fun getRand(): Double {
+                                        return Random.nextDouble(0.0, 255.0)
                                     }
 
-                                    saveImage(imageMat, "out.jpg")
+                                    for (face in faces) {
+                                        Imgproc.rectangle(imageMat, face.tl(), face.br(), Scalar(getRand(), getRand(), getRand()), 3)
+                                    }
+
+                                    saveImage(imageMat, "face_out.jpg")
+                                    Helper.emitImageResult(message, "face_out.jpg")
                                 } else {
                                     println("Couldn\'t open input file")
                                 }

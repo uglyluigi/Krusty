@@ -57,3 +57,5 @@ Cargo.lock
 **/*.rs.bk
 
 # End of https://www.toptal.com/developers/gitignore/api/kotlin,java,rust
+
+./Kotlin/lib/
